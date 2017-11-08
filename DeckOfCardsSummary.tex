@@ -1,0 +1,193 @@
+\documentclass[12pt]{amsart}
+\pagestyle{empty}
+
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{color}
+\usepackage[left=0.7in,top=1in,right=0.7in,bottom=1in]{geometry}
+
+%Python package setup
+\usepackage{listings}
+\usepackage[utf8]{inputenc}
+\DeclareFixedFont{\ttb}{T1}{txtt}{bx}{n}{12} % for bold
+\DeclareFixedFont{\ttm}{T1}{txtt}{m}{n}{12}  % for normal
+% Custom colors
+\usepackage{color}
+\definecolor{deepblue}{rgb}{0,0,0.5}
+\definecolor{deepred}{rgb}{0.6,0,0}
+\definecolor{deepgreen}{rgb}{0,0.5,0}
+% Python style for highlighting
+\newcommand\pythonstyle{\lstset{
+language=Python,
+basicstyle=\ttm,
+otherkeywords={self},             % Add keywords here
+keywordstyle=\ttb\color{deepblue},
+emph={MyClass,__init__},          % Custom highlighting
+emphstyle=\ttb\color{deepred},    % Custom highlighting style
+stringstyle=\color{deepgreen},
+frame=tb,                         % Any extra options here
+showstringspaces=false            % 
+}}
+% Python environment
+\lstnewenvironment{python}[1][]
+{
+\pythonstyle
+\lstset{#1}
+}
+{}
+% Python for external files
+\newcommand\pythonexternal[2][]{{
+\pythonstyle
+\lstinputlisting[#1]{#2}}}
+
+
+\begin{document}
+
+\begin{center}
+\Large{\bf{Deck of cards summary}} \\
+\large{\bf{Avinash J. Dalal}}
+\end{center}
+
+%\vspace{0.2in}
+
+\section{Distribution of card values}
+\label{DistributionOfCardValues}
+In the first experiment, we take a standard deck of 52 cards, and we compute the average, median and the standard deviation.  To compute these, we created the histogram in Figure \ref{fig:DeckOfCardsHistogram}.  The histogram can be understood by assigning a value to each of the cards.  Specifically, each Ace is assigned a value of 1, numbered cards take the value printed on the card, and the Jack, Queen, and King each take a value of 10.
+
+The histogram of Figure \ref{fig:DeckOfCardsHistogram} depicts the relative frequencies of the card values for a single draw.  It shows us that for the distribution given by the histogram, we have \\
+\begin{center}
+Average $\sim 6.54$ \hspace{0.3in} Median $= 7$ \hspace{0.3in} $\sigma \sim$ 3.15\,.
+\end{center}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[]{DeckOfCardsHistogram}
+    \caption{Histogram for a standard deck of cards}
+    \label{fig:DeckOfCardsHistogram}
+\end{figure}
+
+\section{Generate data}
+In this section we get samples for a new distribution for a standard deck of playing cards.  To obtain a single sample, we shuffle the deck of cards and draw three cards from it.  We sample from the deck without replacement.  We record the cards that we have drawn and the sum of the three card values, defined in Section \ref{DistributionOfCardValues}.  We then replace the drawn cards back into the deck and repeat this sampling procedure a total of at least thirty times.
+
+Figure \ref{fig:CardSampleHistogram} shows us a histogram of a random sampling of 3 random cards over 100,000 trials.  It shows us that for the distribution given by the histogram, we have the following two measures of central tendency and variability
+\begin{center}
+Average $\sim 17.52$, Median $= 18$, $s \sim$ 5.596, Interquartile range $\sim (13.74, 21.3)$\,.
+\end{center}
+
+In comparison to Figure \ref{fig:DeckOfCardsHistogram}, the histogram of Figure  \ref{fig:CardSampleHistogram} seems to be more a centered normal distribution.  Figure \ref{fig:DeckOfCardsHistogram} is a very negatively skewed distribution.  The reason for the difference in the histograms between Figures \ref{fig:DeckOfCardsHistogram} and  \ref{fig:CardSampleHistogram} is due to the sampling methods.  The histogram of Figure \ref{fig:CardSampleHistogram} is a result of sampling three cards randomly without replacement, while the histogram of Figure \ref{fig:DeckOfCardsHistogram} is a result of sampling just one card randomly.
+
+From the histogram of Figure \ref{fig:CardSampleHistogram}, with an average of 17.52 and a close median value of 18, we would estimate that a future draw of three cards would have card values whose sum is 18.  Since the histogram of Figure \ref{fig:CardSampleHistogram} is normal distribution, we can normalize it with the average and standard deviation to get $z$-scores.  Upon standardizing, we can make many observations, two of which are the following.
+\begin{enumerate}
+\item  From the standard normal $z$-score table, the $z$-score corresponding to a probability of 0.05 is $z = -1.645$.  With this $z$-score, we expect approximately the draw values (the sum of the three card values for the cards drawn) up to
+$$
+8.315 \sim -1.645(5.596) + 17.52
+$$
+have probability $0.05$\,.  Similarly, we expect approximately the draw values up to $26.725$ have probability $0.95$\,.  This tells us we expect approximately that $90 \%$ of draw values to fall in the range of $(8.315, 26.725)$\,.
+\item The approximate probability that we will get draw values of at most 20 is 0.67, which is obtained from the $z$-score table by considering a $z$-score value of 
+$$
+0.44 \sim \dfrac{20 - 17.52}{5.596}\,.
+$$
+This tells us that the approximate probability that we will get draw values of at least 20 is $1 - 0.67 = 0.33$\,.
+\end{enumerate}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[]{CardSampleHistogram}
+    \caption{Histogram for 100,000 trials of sampling 3 random cards (bin size = 3)}
+    \label{fig:CardSampleHistogram}
+\end{figure}
+
+\section{Python Code}
+\label{PythonCode}
+\begin{python}
+def CardValue(card):
+    
+    value = 0
+    
+    if(card[0] == 'A'):
+        value = value + 1
+        
+    elif(card[0] == 'J' or card[0] == 'Q' or card[0] == 'K'):
+        value = value + 10
+        
+    else:
+        value = value + int(card[0])
+        
+    return value
+
+def OneCardSample():
+    
+    CardSampleSum = 0
+    CardDeck = ['Ac', '2c', '3c', '4c', '5c', '6c', '7c', '8c', '9c',
+     '10c', 'Jc', 'Qc', 'Kc', 'Ad', '2d', '3d', '4d', '5d', '6d', '7d', 
+     '8d', '9d', '10d', 'Jd', 'Qd', 'Kd', 'Ah', '2h', '3h', '4h', '5h',
+     '6h', '7h', '8h', '9h', '10h', 'Jh', 'Qh', 'Kh', 'As', '2s', '3s',
+     '4s', '5s', '6s', '7s', '8s', '9s', '10s', 'Js', 'Qs', 'Ks']
+    random.shuffle(CardDeck)
+    size = len(CardDeck)
+    
+    Index = random.randrange(size)
+    randCard = CardDeck[Index]
+    randCardValue = CardValue(list(randCard))
+    return [randCard, randCardValue]
+
+def OneCardTrials(n):
+    
+    CardValueArray = [0 for i in range(0,n)]
+    
+    for i in range(0,n):
+        Sample = OneCardSample()
+        CardValueArray[i] = Sample[1]
+        
+    return CardValueArray
+
+
+def ThreeCardSample():
+    
+    CardSampleSum = 0
+    CardDeck = ['Ac', '2c', '3c', '4c', '5c', '6c', '7c', '8c', '9c',
+     '10c', 'Jc', 'Qc', 'Kc', 'Ad', '2d', '3d', '4d', '5d', '6d', '7d', 
+     '8d', '9d', '10d', 'Jd', 'Qd', 'Kd', 'Ah', '2h', '3h', '4h', '5h',
+     '6h', '7h', '8h', '9h', '10h', 'Jh', 'Qh', 'Kh', 'As', '2s', '3s',
+     '4s', '5s', '6s', '7s', '8s', '9s', '10s', 'Js', 'Qs', 'Ks']
+    random.shuffle(CardDeck)
+    size = len(CardDeck)
+    
+    removeAtIndex = random.randrange(size)
+    rand1 = CardDeck[removeAtIndex]
+    CardSampleSum = CardSampleSum + CardValue(list(rand1))
+    CardDeck[removeAtIndex] = CardDeck[size-1]
+    
+    removeAtIndex = random.randrange(size-1)
+    rand2 = CardDeck[removeAtIndex]
+    CardSampleSum = CardSampleSum + CardValue(list(rand2))
+    CardDeck[removeAtIndex] = CardDeck[size-2]
+    
+    removeAtIndex = random.randrange(size-2)
+    rand3 = CardDeck[removeAtIndex]
+    CardSampleSum = CardSampleSum + CardValue(list(rand3))
+    return [rand1, rand2, rand3, CardSampleSum]
+
+
+def ThreeCardTrials(n):
+    
+    ThreeCardSums = [0 for i in range(0,n)]
+    for i in range(0,n):
+        Sample = ThreeCardSample()
+        ThreeCardSums[i] = Sample[3]
+    
+    return ThreeCardSums
+    
+import numpy as np
+import matplotlib.pyplot as plt
+ThreeCardSums = ThreeCardTrials(100000)
+print "Average is ", np.average(ThreeCardSums) 
+print "Median is ", np.median(ThreeCardSums)
+print "Standard deviation is ", np.std(ThreeCardSums)
+myBins = [3*i for i in range(1,11)]
+plt.hist(ThreeCardSums, bins = myBins)
+plt.show()
+\end{python}
+\end{document}
